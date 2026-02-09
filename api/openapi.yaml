@@ -8,6 +8,12 @@ servers:
   - url: https://api.example.com/v1
     description: Production
 
+tags:
+  - name: Connections
+    description: Manage integration connections
+  - name: Webhooks
+    description: Trigger and test webhook delivery
+
 security:
   - bearerAuth: []
 
@@ -34,16 +40,54 @@ components:
           enum: [active, paused, error]
           example: active
 
+    WebhookTestRequest:
+      type: object
+      required: [event, connectionId]
+      properties:
+        event:
+          type: string
+          description: Event type to simulate.
+          example: connection.updated
+        connectionId:
+          type: string
+          description: Target connection for the test delivery.
+          example: conn_123
+        targetUrl:
+          type: string
+          description: Optional override for the webhook URL used for test delivery.
+          example: https://webhook.site/your-id
+
+    WebhookTestResponse:
+      type: object
+      required: [requestId, status]
+      properties:
+        requestId:
+          type: string
+          example: req_9f2c1a
+        status:
+          type: string
+          enum: [accepted]
+          example: accepted
+
     Error:
       type: object
+      required: [code, message, requestId]
       properties:
+        code:
+          type: string
+          example: invalid_request
         message:
           type: string
           example: Invalid request
+        requestId:
+          type: string
+          example: req_9f2c1a
 
 paths:
   /connections:
     get:
+      tags: [Connections]
+      operationId: listConnections
       summary: List connections
       description: Returns all configured integrations.
       responses:
@@ -55,9 +99,32 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Connection"
+              examples:
+                default:
+                  value:
+                    - id: conn_123
+                      provider: stripe
+                      status: active
+                    - id: conn_456
+                      provider: workday
+                      status: paused
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                default:
+                  value:
+                    code: unauthorized
+                    message: Missing or invalid bearer token
+                    requestId: req_unauth_01
 
   /connections/{id}:
     get:
+      tags: [Connections]
+      operationId: getConnection
       summary: Get connection by ID
       parameters:
         - name: id
@@ -72,8 +139,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Connection"
+              examples:
+                default:
+                  value:
+                    id: conn_123
+                    provider: stripe
+                    status: active
         "404":
           description: Connection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                default:
+                  value:
+                    code: not_found
+                    message: Connection conn_999 does not exist
+                    requestId: req_nf_01
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
@@ -81,8 +166,49 @@ paths:
 
   /webhooks/test:
     post:
+      tags: [Webhooks]
+      operationId: sendTestWebhook
       summary: Send a test webhook
       description: Triggers a test webhook delivery.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookTestRequest"
+            examples:
+              default:
+                value:
+                  event: connection.updated
+                  connectionId: conn_123
+                  targetUrl: https://webhook.site/your-id
       responses:
         "202":
           description: Webhook accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookTestResponse"
+              examples:
+                default:
+                  value:
+                    requestId: req_9f2c1a
+                    status: accepted
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                default:
+                  value:
+                    code: invalid_request
+                    message: event is required
+                    requestId: req_bad_01
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
