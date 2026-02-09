@@ -48,6 +48,19 @@
         ]
       },
       {
+        "tab": "Support",
+        "groups": [
+          {
+            "group": "Operations",
+            "pages": [
+              "support/triage",
+              "support/troubleshooting",
+              "support/runbooks"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "API reference",
         "groups": [
           {

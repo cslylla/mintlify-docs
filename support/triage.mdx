@@ -1,0 +1,28 @@
+---
+title: Support Triage
+description: A repeatable workflow to diagnose and resolve Mintlify docs + OpenAPI issues.
+---
+
+## Intake (copy/paste template)
+- Workspace / site URL:
+- Repo URL + branch:
+- What changed last?
+- Expected vs actual:
+- Repro steps:
+- Screenshots / error logs:
+
+## First 10 minutes checklist
+1. Confirm the issue reproduces locally (`mintlify dev`)
+2. Check `docs.json` for navigation paths + syntax (commas, braces)
+3. Validate OpenAPI (`mint openapi-check api/openapi.yaml`)
+4. Inspect recent commits (`git log -n 10`)
+5. Identify minimal repro commit and rollback option (`git revert <sha>`)
+
+## Escalation criteria
+Escalate only if:
+- reproducible platform bug
+- inconsistent behavior between local and deploy
+- requires internal tooling access
+
+Include:
+- site URL, repo URL, commit SHA, local logs, expected/actual
