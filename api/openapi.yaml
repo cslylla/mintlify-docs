@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: Demo Integrations API
+  description: API used for demonstrating Mintlify OpenAPI documentation and support workflows.
+  version: "1.0.0"
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Connection:
+      type: object
+      required: [id, provider, status]
+      properties:
+        id:
+          type: string
+          example: conn_123
+        provider:
+          type: string
+          example: stripe
+        status:
+          type: string
+          enum: [active, paused, error]
+          example: active
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid request
+
+paths:
+  /connections:
+    get:
+      summary: List connections
+      description: Returns all configured integrations.
+      responses:
+        "200":
+          description: A list of connections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Connection"
+
+  /connections/{id}:
+    get:
+      summary: Get connection by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A single connection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connection"
+        "404":
+          description: Connection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /webhooks/test:
+    post:
+      summary: Send a test webhook
+      description: Triggers a test webhook delivery.
+      responses:
+        "202":
+          description: Webhook accepted

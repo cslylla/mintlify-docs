@@ -4,8 +4,8 @@
   "name": "My Docs",
   "colors": {
     "primary": "#DBA11C",
-    "light": "#dfE0DF",
-    "dark": "#402E32"
+    "light": "#DBA11C",
+    "dark": "#DBA11C"
   },
   "favicon": "/favicon.png",
   "navigation": {
@@ -51,6 +51,10 @@
         "tab": "API reference",
         "groups": [
           {
+            "group": "API Reference (OpenAPI)",
+            "openapi": "api/openapi.yaml"
+          },
+          {
             "group": "API documentation",
             "pages": [
               "api-reference/introduction"
@@ -84,8 +88,8 @@
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo/light.png",
+    "dark": "/logo/light.png"
   },
   "navbar": {
     "links": [
