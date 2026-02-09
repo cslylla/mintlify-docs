@@ -1,0 +1,99 @@
+---
+title: Runbooks
+description: Step-by-step resolution guides for recurring support issues.
+---
+
+## Runbook: OpenAPI Reference stopped rendering after deploy
+
+**Impact**
+- API Reference tab broken for all users
+
+**Detection**
+- Customer report
+- Empty API Reference section on production
+- Local dev previously working
+
+**Cause**
+- OpenAPI file renamed without updating `docs.json`
+
+**Resolution**
+1. Identify missing file:
+   ```bash
+   ls api/
+   ```
+2. Update `docs.json`:
+    ```json
+    "openapi": "api/openapi.yaml"
+    ```
+3. Validate:
+    ```bash
+   mint openapi-check api/openapi.yaml
+   ```
+4. Commit and deploy fix
+
+**Verification**
+- API Reference visible
+- Endpoints and playground load correctly
+
+**Prevention**
+- Require OpenAPI path checks in PR review
+- Add a checklist item for `docs.json` changes
+
+## Runbook: Docs fail to build due to navigation error
+
+**Impact**
+- Docs site fails to load locally and in production
+
+**Detection**
+- `mintlify dev` throws navigation/path errors
+
+**Cause**
+- Navigation references a missing page
+
+**Resolution**
+1. Identify invalid page entry in docs.json
+2. Either:
+    - Create the missing file, or
+    - Remove the page from navigation
+3. Restart local dev
+
+**Verification**
+- Site loads locally
+- Sidebar renders all sections
+
+**Prevention**
+- Validate nav changes by running local dev before merge
+
+## Runbook: Authentication missing in API playground
+
+**Impact**
+- Users cannot test endpoints
+- Support tickets reporting 401 errors
+
+**Detection**
+- Playground does not show auth input
+- Curl examples missing Authorization header
+
+**Cause**
+- Missing or misconfigured `security` / `securitySchemes`
+
+**Resolution**
+1. Define scheme:
+   ```yaml
+   securitySchemes:
+     bearerAuth:
+     type: http
+    scheme: bearer
+   ```
+2. Apply globally:
+   ```yaml
+   security:
+   - bearerAuth: []
+   ```
+
+**Verification**
+- Playground shows Bearer token input
+- Curl includes Authorization header
+
+**Prevention**
+- Standardize auth configuration across specs

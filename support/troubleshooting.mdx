@@ -1,0 +1,121 @@
+---
+title: Troubleshooting
+description: Common Mintlify issues, root causes, and verified fixes.
+---
+
+## API Reference tab is empty or missing endpoints
+
+**Symptoms**
+- “API Reference (OpenAPI)” tab renders but shows no endpoints
+- Sidebar appears but is blank
+- No errors in the UI
+
+**Environment to check**
+- `docs.json`
+- OpenAPI file path
+- Local dev output
+
+**Root causes**
+- Incorrect relative path in `docs.json`
+- OpenAPI file renamed or moved
+- YAML indentation or syntax error (even if schema previously validated)
+
+**How to diagnose**
+1. Confirm the file path in `docs.json` matches the repo exactly:
+   ```json
+   "openapi": "api/openapi.yaml"
+    ```
+2. Run
+    ```bash
+    mint openapi-check api/openapi.yaml
+    ```
+3. Restart local dev:
+    ```bash
+    mintlify dev
+    ```
+**Fix**
+- Correct the path or restore the file name
+- Fix YAML indentation issues
+- Re-run validation and local preview
+
+**Verify**
+- Endpoints appear under the API Reference tab
+- Tags group endpoints correctly
+- Playground renders curl + response examples
+
+## API endpoints not grouped as expected
+
+**Symptoms**
+- Endpoints appear flat or grouped by path instead of by domain
+- Tags defined but not reflected in UI
+
+**Root causes**
+- Missing tags on individual operations
+- Tag name mismatch (case-sensitive)
+- Theme sorts by path when tags are absent
+
+**How to diagnose**
+1. Inspect each operation for:
+   ```yaml
+   tags: [Connections]
+    ```
+2. Ensure tag names match exactly those defined at the top of the spec.
+
+**Fix**
+- Add tags to every operation
+- Normalize casing across the spec
+
+**Verify**
+
+- Sidebar shows grouped sections (e.g. Connections, Webhooks)
+
+## OpenAPI playground shows no request body input
+
+**Symptoms**
+- `POST` endpoint renders
+- No request body editor visible
+
+**Root causes**
+- Missing `requestBody`
+- `requestBody` marked as optional but expected
+- Schema referenced incorrectly
+
+**Fix**
+- Add:
+    ```yaml
+    requestBody:
+        required: true
+        content:
+            application/json:
+                schema:
+                    $ref: "#/components/schemas/YourSchema"
+    ```
+**Verify**
+- `JSON` editor appears in playground
+- Example payload is pre-filled
+
+## Docs build fails after navigation change
+
+**Symptoms**
+- Local dev fails to start
+- Sidebar shows broken or empty section
+
+**Root causes**
+
+- Navigation references a non-existent file
+- File renamed without updating `docs.json`
+
+**How to diagnose**
+1. Check recent changes:
+    ```bash
+    git log -n 5
+    ```
+2. Verify all pages entries map to real `.mdx` files.
+
+**Fix**
+- Remove invalid page entries or restore missing files
+
+**Verify**
+
+- `mintlify dev` runs without errors
+- Navigation renders correctly
